@@ -1,0 +1,36 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the gwt binary into dist/
+    vars:
+      VERSION:
+        sh: git describe --tags --always --dirty 2>/dev/null || echo dev
+    cmds:
+      - go build -ldflags "-X github.com/joel-thompson/gwt/internal/cmd/root.Version={{.VERSION}}" -o dist/gwt ./cmd/gwt
+
+  install:
+    desc: Install gwt into $GOBIN
+    cmds:
+      - go install ./cmd/gwt
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofmt -w .
+
+  check:
+    desc: Lint and test
+    cmds:
+      - task: lint
+      - task: test
