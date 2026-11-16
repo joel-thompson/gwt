@@ -46,6 +46,12 @@ internal/<domain>/     Business logic (e.g. worktree paths, git calls), no Cobra
 agents/                Design guidelines and plans.
 ```
 
+## Manual testing
+
+For manual CLI testing, use the local sandbox at `~/testing/worktree-testing`.
+See [README.md](README.md#manual-testing-sandbox) for fixtures and isolated
+`GWT_ROOT` / `AI_SPECS` settings.
+
 ## Commands
 
 For local development, use `task dev -- <args>` (e.g. `task dev -- --help`).
