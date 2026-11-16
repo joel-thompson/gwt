@@ -48,6 +48,10 @@ agents/                Design guidelines and plans.
 
 ## Commands
 
+For local development, use `task dev -- <args>` (e.g. `task dev -- --help`).
+This runs the CLI without installing it or replacing the existing zsh script.
+Keep the install task commented out until feature parity.
+
 ```
 task build    # dist/gwt
 task test
