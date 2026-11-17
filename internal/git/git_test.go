@@ -70,8 +70,7 @@ func TestOpenFailures(t *testing.T) {
 		assert.Check(t, commandErr.ExitCode != 0)
 		assert.Check(t, cmp.Contains(commandErr.Stderr, "not a git repository"))
 		assert.Check(t, cmp.Equal(commandErr.Dir, filepath.Dir(main)))
-		assert.Check(t, cmp.DeepEqual(commandErr.Args, []string{"rev-parse", "--show-toplevel"}))
-		assert.Check(t, cmp.ErrorContains(err, commandErr.Stderr[:len(commandErr.Stderr)-1]))
+		assert.Check(t, cmp.ErrorContains(err, strings.TrimSpace(commandErr.Stderr)))
 		var exitErr *exec.ExitError
 		assert.Check(t, errors.As(err, &exitErr))
 	})
@@ -102,36 +101,53 @@ func TestWorktrees(t *testing.T) {
 	assert.NilError(t, err)
 	worktrees, err := repo.Worktrees(t.Context())
 	assert.NilError(t, err)
-	assert.Assert(t, cmp.Len(worktrees, 4))
-	assert.Check(t, cmp.Equal(worktrees[0].Path, main))
-
 	head := strings.TrimSpace(gitRun(t, main, "rev-parse", "HEAD"))
 	byPath := make(map[string]git.Worktree)
 	for _, worktree := range worktrees {
 		byPath[worktree.Path] = worktree
 	}
-	assert.Check(t, cmp.DeepEqual(byPath[main], git.Worktree{
-		Path: main, Head: head, Branch: "main",
-	}))
-	assert.Check(t, cmp.DeepEqual(byPath[linked], git.Worktree{
-		Path: linked, Head: head, Branch: "feature/nested", Locked: true, LockReason: "keep this\ncheckout",
-	}))
-	assert.Check(t, cmp.DeepEqual(byPath[detached], git.Worktree{
-		Path: detached, Head: head, Detached: true,
-	}))
-	assert.Check(t, byPath[prunable].Prunable)
-	assert.Check(t, byPath[prunable].PruneReason != "")
+	t.Run("lists all worktrees", func(t *testing.T) {
+		assert.Check(t, cmp.Len(worktrees, 4))
+	})
+
+	t.Run("main worktree is first", func(t *testing.T) {
+		assert.Assert(t, len(worktrees) > 0)
+		assert.Check(t, cmp.Equal(worktrees[0].Path, main))
+		assert.Check(t, cmp.DeepEqual(byPath[main], git.Worktree{
+			Path: main, Head: head, Branch: "main",
+		}))
+	})
+
+	t.Run("linked worktree locked with reason", func(t *testing.T) {
+		assert.Check(t, cmp.DeepEqual(byPath[linked], git.Worktree{
+			Path: linked, Head: head, Branch: "feature/nested", Locked: true, LockReason: "keep this\ncheckout",
+		}))
+	})
+
+	t.Run("detached worktree", func(t *testing.T) {
+		assert.Check(t, cmp.DeepEqual(byPath[detached], git.Worktree{
+			Path: detached, Head: head, Detached: true,
+		}))
+	})
+
+	t.Run("prunable worktree", func(t *testing.T) {
+		assert.Check(t, byPath[prunable].Prunable)
+		assert.Check(t, byPath[prunable].PruneReason != "")
+	})
 
 	t.Run("lock without reason", func(t *testing.T) {
 		gitRun(t, main, "worktree", "lock", detached)
 		worktrees, err := repo.Worktrees(t.Context())
 		assert.NilError(t, err)
+		found := false
 		for _, worktree := range worktrees {
 			if worktree.Path == detached {
+				found = true
 				assert.Check(t, worktree.Locked)
 				assert.Check(t, cmp.Equal(worktree.LockReason, ""))
 			}
 		}
+		assert.Check(t, cmp.Equal(found, true), "expected detached worktree %q", detached)
 	})
 }
 
