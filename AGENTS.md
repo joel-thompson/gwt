@@ -24,7 +24,7 @@ matching file before writing the code it governs:
 | Return an error or pick an exit code | [agents/05-errors.md](agents/05-errors.md) |
 | Add a flag or argument | [agents/06-arguments-and-flags.md](agents/06-arguments-and-flags.md) |
 | Add or restructure a subcommand | [agents/08-subcommands.md](agents/08-subcommands.md) |
-| Write or change a test | [agents/14-testing.md](agents/14-testing.md) |
+| Plan test coverage, write or change a test | [agents/14-testing.md](agents/14-testing.md) |
 
 Those files name circleci-cli paths (`clikit/errors`, `internal/cmd/root/usage_test.go`,
 `internal/conventions`, `internal/ui`, ...) that don't exist here. Follow the rule, and
@@ -36,6 +36,8 @@ create the equivalent package here when a feature first needs it.
   message goes to stderr. The wrapper breaks if anything else reaches stdout.
 - Every command gets `Use`, `Short`, `Long` and `Example` (heredoc, 3+ examples).
 - Shell out to `git` rather than adding a git library, to match the script's behavior.
+- Write integration, end-to-end, and black-box tests rather than isolated unit
+  tests; follow the test-writing guidelines in [agents/14-testing.md](agents/14-testing.md).
 
 ## Layout
 

@@ -1,5 +1,19 @@
 # Testing
 
+## Test boundaries
+
+Write integration, end-to-end, and black-box tests, not isolated unit tests.
+Exercise observable behavior through public boundaries with real collaborators:
+run the compiled binary for CLI behavior, and use exported package APIs with real
+Git repositories and temporary files for domain integration tests.
+
+Assert public results and state changes rather than private helpers, internal
+fields, or mocked call sequences. Cover business logic and edge cases through
+these boundaries instead of adding isolated helper tests.
+
+The test-writing guidelines below still apply: test grouping, assertions, golden
+files, and output checks are independent of the test boundary.
+
 **Rules** — the whole of this file in short form. Read the rest for the reasoning
 and the examples.
 
@@ -33,7 +47,7 @@ and the examples.
 | A reusable component (`clikit/ui/components`) | `<component>_test.go` beside it | teatest: run the model as a program, send keys, assert on frames and state |
 | A flow (`internal/ui`) | `<flow>_test.go` beside it | teatest, usually with a small harness that answers a snapshot/probe message from inside the program loop |
 | A command end to end | `acceptance/` | `binary.RunCLI` (or `binary.RunCLIInteractive`) against `fakes.NewCircleCI` |
-| Pure business logic, renderers, helpers | beside the code | plain table-driven tests; there is no program loop to drive |
+| Domain behavior involving Git or the filesystem | external `<package>_test` package beside the code | exported API with real Git repositories and temporary files; see `internal/git/git_test.go` |
 
 **Why teatest and not a direct `Update` call.** A model called directly never sees
 the program loop: message ordering, the commands its `Update` returns, resize

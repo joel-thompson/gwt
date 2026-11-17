@@ -80,3 +80,32 @@ Keep using the zsh script until every parity item below is done. Once it is:
       run the binary and `cd` into its stdout, replacing the hand-written ones in
       `.zshrc_all`. The binary name and the wrapper name collide, so the wrapper
       must call the binary by absolute path or `command gwt`.
+
+## Skill
+
+skill command that returns the skill that ought to be used by agents
+
+## stale (new)
+
+Report potentially abandoned worktrees, not Git's stale worktree metadata
+(`git worktree prune`). Activity is an estimate of edits and Git operations,
+not a record of when someone last opened or read the worktree.
+
+- [ ] `gwt stale` lists linked worktrees in the current repository with no
+      estimated activity for at least 30 days; exclude the main checkout.
+- [ ] `gwt stale --days <days>` overrides the threshold with a positive integer.
+- [ ] Estimate last activity using the most recent modification time among
+      tracked and non-ignored untracked files, supplemented by that worktree's
+      HEAD reflog. Ignored-file edits do not count.
+- [ ] A newly created worktree must not be considered stale just because its
+      checked-out commit is old. Do not use commit dates or directory
+      modification times alone as the activity signal.
+- [ ] Report each candidate's branch (or detached HEAD), path, and estimated
+      last activity. Clearly label dirty and locked candidates rather than
+      hiding them.
+- [ ] Report missing worktree directories separately from inactive worktrees.
+      If activity cannot be determined (e.g. unreadable files), report that
+      uncertainty rather than silently treating the worktree as inactive.
+- [ ] Report only: do not remove worktrees, delete branches, or prune metadata.
+      The user can review candidates and explicitly run `gwt rm`.
+- [ ] Send listing output to stderr; leave stdout empty.
