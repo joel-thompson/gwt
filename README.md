@@ -15,6 +15,26 @@ task dev -- <command> <args>
 Arguments after `--` are forwarded to the CLI. This leaves the existing zsh
 script untouched; installation stays disabled until feature parity.
 
+## Git layer
+
+`internal/git` shells out to the installed `git` executable; it does not use a Git
+library or a shell. `git.Open(ctx, dir)` discovers the checkout containing `dir`,
+including from inside a linked worktree. The returned repository provides:
+
+- `Path()`, `MainPath()`, and `CommonDir()` for checkout and shared metadata paths.
+- `Worktrees(ctx)` for structured listings, including detached, locked, and
+  prunable worktrees. Branch names omit the `refs/heads/` prefix.
+- `HasLocalBranch(ctx, name)` for exact local branch checks, not revision lookup.
+
+Bare repositories cannot be opened directly because they have no checkout.
+All Git output is captured, never printed. Execution failures return a
+`*git.CommandError` with the arguments, directory, exit status, and Git stderr;
+wrapped execution errors and context cancellation remain available through
+`errors.Is` / `errors.As`.
+
+Tests use temporary real repositories, with Git configuration isolated from the
+user's settings. Run them with `go test ./internal/git`.
+
 ## Manual testing sandbox
 
 A local sandbox is available at `~/testing/worktree-testing` (outside this repo):
